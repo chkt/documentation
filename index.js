@@ -5,7 +5,6 @@ var fs = require('fs'),
   sort = require('./lib/sort'),
   nest = require('./lib/nest'),
   filterAccess = require('./lib/filter_access'),
-  filterJS = require('./lib/filter_js'),
   dependency = require('./lib/input/dependency'),
   shallow = require('./lib/input/shallow'),
   parseJavaScript = require('./lib/parsers/javascript'),
@@ -214,8 +213,6 @@ function buildSync(indexes, options) {
     options.github && github,
     garbageCollect);
 
-  var jsFilterer = filterJS(options.extension, options.polyglot);
-
   return filterAccess(options.access,
     hierarchy(
       sort(
@@ -229,10 +226,6 @@ function buildSync(indexes, options) {
             };
           } else {
             indexObject = index;
-          }
-
-          if (!jsFilterer(indexObject)) {
-            return [];
           }
 
           return parseFn(indexObject, options).map(buildPipeline);
@@ -309,7 +302,6 @@ function lint(indexes, options, callback) {
     callback(null,
       formatLint(hierarchy(
         inputs
-          .filter(filterJS(options.extension, options.polyglot))
           .reduce(function (memo, file) {
             return memo.concat(parseFn(file, options).map(lintPipeline));
           }, [])
